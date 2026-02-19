@@ -1,5 +1,9 @@
 #include "../../idlib/precompiled.h"
 #pragma hdrstop
+/*#include <iostream>
+#include <cstdlib>
+#include <ctime>
+*/
 
 #include "../Game_local.h"
 #include "../Weapon.h"
@@ -48,7 +52,7 @@ protected:
 	float								reloadRate;
 
 	bool								idleEmpty;
-
+	// the bool up above ^^^ seems to check whether or not you have ammo that can be fired
 private:
 
 	stateResult_t		State_Idle				( const stateParms_t& parms );
@@ -129,7 +133,8 @@ void rvWeaponRocketLauncher::Spawn ( void ) {
 	}
 
 	SetState ( "Raise", 0 );	
-	SetRocketState ( "Rocket_Idle", 0 );
+	SetRocketState ( "Rocket_Fire", 0 );
+	//changed from Rocket_Idle to Rocket_Fire
 }
 
 /*
@@ -444,15 +449,32 @@ stateResult_t rvWeaponRocketLauncher::State_Fire ( const stateParms_t& parms ) {
 		STAGE_WAIT,
 	};	
 	switch ( parms.stage ) {
-		case STAGE_INIT:
-			nextAttackTime = gameLocal.time + (fireRate * owner->PowerUpModifier ( PMOD_FIRERATE ));		
-			Attack ( false, 1, spread, 0, 1.0f );
-			PlayAnim ( ANIMCHANNEL_LEGS, "fire", parms.blendFrames );	
-			return SRESULT_STAGE ( STAGE_WAIT );
-	
+		
+	case STAGE_INIT: {
+		nextAttackTime = gameLocal.time + (fireRate * owner->PowerUpModifier(PMOD_FIRERATE));
+		//EVERYTHING BELOW SHOULD MAKE THE GAMBLING ROCKET LAUNCHER
+		//HOPEFULLY
+		float gamba = gameLocal.random.RandomFloat() * 7;
+		gameLocal.Printf("%s \n", "spun the wheel!");
+		if (gamba < 1) {
+			Attack(false, 6, 6, 6, 67.0f);
+			//the 3rd 6 is a fuse offset that PROLLY kills you and blows you up, just like in my old bomb vest launcher
+			PlayAnim(ANIMCHANNEL_LEGS, "fire", parms.blendFrames);
+			gameLocal.Printf("%s \n", "oh no!!!");
+			return SRESULT_STAGE(STAGE_WAIT);
+		}
+		else {
+			Attack(false, gamba, gamba, 0, 1.0f);
+			PlayAnim(ANIMCHANNEL_LEGS, "fire", parms.blendFrames);
+			gameLocal.Printf("%s \n", "lucky!!!");
+			gameLocal.Printf("You rolled: %f \n", gamba);
+			return SRESULT_STAGE(STAGE_WAIT);
+		}
+	}
 		case STAGE_WAIT:			
 			if ( wsfl.attack && gameLocal.time >= nextAttackTime && ( gameLocal.isClient || AmmoInClip ( ) ) && !wsfl.lowerWeapon ) {
 				SetState ( "Fire", 0 );
+				gameLocal.Printf("%s \n", "is it here?");
 				return SRESULT_DONE;
 			}
 			if ( gameLocal.time > nextAttackTime && AnimDone ( ANIMCHANNEL_LEGS, 4 ) ) {
