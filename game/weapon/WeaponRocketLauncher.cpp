@@ -456,7 +456,14 @@ stateResult_t rvWeaponRocketLauncher::State_Fire ( const stateParms_t& parms ) {
 		//HOPEFULLY
 		float gamba = gameLocal.random.RandomFloat() * 7;
 		gameLocal.Printf("%s \n", "spun the wheel!");
-		if (gamba < 1) {
+		if (gamba < 7 && gamba > 6.5) {
+			Attack(false, gamba * 2, gamba * 2, 0, 1.0f);
+			PlayAnim(ANIMCHANNEL_LEGS, "fire", parms.blendFrames);
+			gameLocal.Printf("%s \n", "JACKPOT!!!");
+			gameLocal.Printf("You rolled: %f \n", gamba);
+			return SRESULT_STAGE(STAGE_WAIT);
+		}
+		else if (gamba < 1) {
 			Attack(false, 6, 6, 6, 67.0f);
 			//the 3rd 6 is a fuse offset that PROLLY kills you and blows you up, just like in my old bomb vest launcher
 			PlayAnim(ANIMCHANNEL_LEGS, "fire", parms.blendFrames);
@@ -464,7 +471,7 @@ stateResult_t rvWeaponRocketLauncher::State_Fire ( const stateParms_t& parms ) {
 			return SRESULT_STAGE(STAGE_WAIT);
 		}
 		else {
-			Attack(false, gamba, gamba, 0, 1.0f);
+			Attack(false, gamba, gamba * 1.0f, 0, 1.0f);
 			PlayAnim(ANIMCHANNEL_LEGS, "fire", parms.blendFrames);
 			gameLocal.Printf("%s \n", "lucky!!!");
 			gameLocal.Printf("You rolled: %f \n", gamba);
